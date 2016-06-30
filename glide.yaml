@@ -1,6 +1,0 @@
-package: github.com/go-st/kapusta
-import:
-  - package: github.com/go-st/logger
-    vcs: git
-    version: ~1.x
-    repo: https://github.com/go-st/logger.git
