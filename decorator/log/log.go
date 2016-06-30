@@ -6,14 +6,15 @@ import (
 	"net/http"
 	"net/http/httputil"
 
-	"github.com/go-st/kapusta"
+	"github.com/lingualeo/kapusta"
 	"github.com/go-st/logger"
+	"golang.org/x/net/context"
 )
 
 // LoggerDecorator returns DecoratorFunc that logs before and after request
 func LoggerDecorator(logger logger.ILogger, dumpRequests bool) kapusta.DecoratorFunc {
-	return func(c kapusta.IClient) kapusta.IClient {
-		return kapusta.ClientFunc(func(r *http.Request) (*http.Response, error) {
+	return func(c kapusta.Client) kapusta.Client {
+		return kapusta.ClientFunc(func(ctx context.Context, r *http.Request) (*http.Response, error) {
 			logger.Debugf("start request: %v", r.URL)
 			var bodyBytes []byte
 
@@ -28,7 +29,7 @@ func LoggerDecorator(logger logger.ILogger, dumpRequests bool) kapusta.Decorator
 				r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
 			}
 
-			response, err := c.Do(r)
+			response, err := c.Do(ctx, r)
 
 			if dumpRequests {
 				// Restore the io.ReadCloser to its original state again, because it has been already read by Do

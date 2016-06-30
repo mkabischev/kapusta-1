@@ -7,16 +7,16 @@ import (
 )
 
 // DefaultClient is adapter for default http.Client
-type DefaultClient struct {
-	client http.Client
+type HTTPClientAdapter struct {
+	client *http.Client
 }
 
 // Do Client interface implementation
-func (c *DefaultClient) Do(ctx context.Context, r *http.Request) (*http.Response, error) {
+func (c *HTTPClientAdapter) Do(ctx context.Context, r *http.Request) (*http.Response, error) {
 	return c.client.Do(r)
 }
 
 // NewDefaultClient returns new instance of DefaultClient
-func NewDefaultClient(c http.Client) Client {
-	return &DefaultClient{c}
+func NewHTTPClientAdapter(c *http.Client) Client {
+	return &HTTPClientAdapter{c}
 }

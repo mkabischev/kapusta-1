@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/go-st/kapusta"
+	"github.com/lingualeo/kapusta"
+	"golang.org/x/net/context"
 )
 
 // HeaderDecorator returns a DecoratorFunc that adds the given HTTP header to every request done by a Client.
@@ -15,26 +16,26 @@ func HeaderDecorator(name, value string) kapusta.DecoratorFunc {
 
 // HeadersDecorator returns a DecoratorFunc that adds the given HTTP headers to every request done by a Client.
 func HeadersDecorator(values map[string]string) kapusta.DecoratorFunc {
-	return func(c kapusta.IClient) kapusta.IClient {
-		return kapusta.ClientFunc(func(r *http.Request) (*http.Response, error) {
+	return func(c kapusta.Client) kapusta.Client {
+		return kapusta.ClientFunc(func(ctx context.Context, r *http.Request) (*http.Response, error) {
 			for key, value := range values {
 				r.Header.Add(key, value)
 			}
-			return c.Do(r)
+			return c.Do(ctx, r)
 		})
 	}
 }
 
 // RecoverDecorator returns a DecoratorFunc that recovers panic and convert it to error
 func RecoverDecorator() kapusta.DecoratorFunc {
-	return func(c kapusta.IClient) kapusta.IClient {
-		return kapusta.ClientFunc(func(r *http.Request) (res *http.Response, err error) {
+	return func(c kapusta.Client) kapusta.Client {
+		return kapusta.ClientFunc(func(ctx context.Context, r *http.Request) (res *http.Response, err error) {
 			defer func() {
 				if r := recover(); r != nil {
 					err = fmt.Errorf("recovered panic: %v", r)
 				}
 			}()
-			return c.Do(r)
+			return c.Do(ctx, r)
 		})
 	}
 }
@@ -47,12 +48,12 @@ func BaseURLDecorator(baseURL string) kapusta.DecoratorFunc {
 		panic(err)
 	}
 
-	return func(c kapusta.IClient) kapusta.IClient {
-		return kapusta.ClientFunc(func(r *http.Request) (*http.Response, error) {
+	return func(c kapusta.Client) kapusta.Client {
+		return kapusta.ClientFunc(func(ctx context.Context, r *http.Request) (*http.Response, error) {
 			r.URL.Scheme = parsed.Scheme
 			r.URL.Host = parsed.Host
 
-			return c.Do(r)
+			return c.Do(ctx, r)
 		})
 	}
 }
