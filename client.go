@@ -19,14 +19,14 @@ func (f ClientFunc) Do(ctx context.Context, r *http.Request) (*http.Response, er
 	return f(ctx, r)
 }
 
-// DecoratorFunc wraps a Client with extra behaviour.
-type DecoratorFunc func(Client) Client
+// MiddlewareFunc wraps a Client with extra behaviour.
+type MiddlewareFunc func(Client) Client
 
 // Decorate decorates a Client c with all the given Decorators, in order.
-func Decorate(c Client, ds ...DecoratorFunc) Client {
+func Chain(c Client, ds ...MiddlewareFunc) Client {
 	result := c
-	for _, decorate := range ds {
-		result = decorate(result)
+	for _, middleware := range ds {
+		result = middleware(result)
 	}
 	return result
 }
